@@ -11,7 +11,7 @@
     "contracts/package-lock.json": true,
 
     "mobile/.expo": true,
-    "mobile/android": true,
+    "mobile/android": false,
     "mobile/expo-env.d.ts": true,
     "mobile/.gitignore": true,
     "mobile/package-lock.json": true
