@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { ASSETS, getAsset, type Asset, type AssetId } from '../models/config/assets';
+import { formatEth } from '../models/format';
+import { getEvmTransactions } from '../models/services/evmHistoryService';
 import { formatBtc, getBitcoinTransactions, getMainnetBitcoinTransactions } from '../models/services/bitcoinService';
 import { formatSol, getMainnetSolanaTransactions, getSolanaTransactions, type SolanaTx } from '../models/services/solanaService';
 import { loadActivity, loadWatchAddress } from '../models/services/walletStorage';
@@ -24,7 +26,7 @@ export type HistoryItem = {
 /**
  * Transaction history for the active wallet:
  * - Bitcoin: full on-chain history from mempool.space (sent + received).
- * - Ethereum networks: transactions sent from this app (public testnet RPCs don't index history).
+ * - Ethereum (Sepolia + Mainnet): full history from Blockscout, plus sends not yet indexed.
  */
 const EXCLUDED_FROM_ACTIVITY_LOG: AssetId[] = ['btc', 'btc-mainnet', 'sol', 'solana-mainnet'];
 
@@ -32,6 +34,7 @@ export function useHistory(filter?: AssetId) {
   const { active } = useWalletStore();
   const walletId = active?.id;
   const btcAddress = active?.btcAddress;
+  const evmAddress = active?.keys.address;
   const solAddress = active?.solAddress;
   const [watchAddresses, setWatchAddresses] = useState<{ btcMainnet?: string; solMainnet?: string }>({});
 
@@ -46,8 +49,14 @@ export function useHistory(filter?: AssetId) {
     const btcMainnet = ASSETS.find((a) => a.id === 'btc-mainnet')!;
     const sol = ASSETS.find((a) => a.id === 'sol')!;
     const solMainnet = ASSETS.find((a) => a.id === 'solana-mainnet')!;
-    const [activity, btcTxs, btcMainnetTxs, solTxs, solMainnetTxs] = await Promise.all([
+    const evmAssets = (['sepolia', 'ethereum'] as const).filter((id) => !filter || filter === id);
+    const [activity, evmTxs, btcTxs, btcMainnetTxs, solTxs, solMainnetTxs] = await Promise.all([
       loadActivity(),
+      Promise.all(
+        evmAssets.map((id) =>
+          evmAddress ? getEvmTransactions(id, evmAddress).catch(() => []) : Promise.resolve([]),
+        ),
+      ),
       !filter || filter === 'btc' ? getBitcoinTransactions(btcAddress!).catch(() => []) : Promise.resolve([]),
       (!filter || filter === 'btc-mainnet') && watchAddresses.btcMainnet
         ? getMainnetBitcoinTransactions(watchAddresses.btcMainnet).catch(() => [])
@@ -58,9 +67,34 @@ export function useHistory(filter?: AssetId) {
         : Promise.resolve([]),
     ]);
 
+    // Full on-chain history (sent + received) from the explorer.
+    const chainHashes = new Set<string>();
+    const evmChainItems: HistoryItem[] = evmAssets.flatMap((id, i) => {
+      const asset = getAsset(id)!;
+      return evmTxs[i].map((tx): HistoryItem => {
+        chainHashes.add(tx.hash.toLowerCase());
+        const out = tx.from.toLowerCase() === evmAddress!.toLowerCase();
+        return {
+          key: `${id}-${tx.hash}`,
+          asset,
+          direction: out ? 'out' : 'in',
+          amount: formatEth(tx.value),
+          counterparty: out ? tx.to : tx.from,
+          time: tx.time ? tx.time * 1000 : undefined,
+          pending: !tx.confirmed,
+          url: asset.txUrl?.(tx.hash),
+        };
+      });
+    });
+
+    // Sent from this app but not yet indexed by the explorer.
     const evmItems: HistoryItem[] = activity
       .filter(
-        (a) => a.walletId === walletId && !EXCLUDED_FROM_ACTIVITY_LOG.includes(a.asset) && (!filter || a.asset === filter),
+        (a) =>
+          a.walletId === walletId &&
+          !EXCLUDED_FROM_ACTIVITY_LOG.includes(a.asset) &&
+          (!filter || a.asset === filter) &&
+          !chainHashes.has(a.hash.toLowerCase()),
       )
       .map((a) => {
         const asset = getAsset(a.asset)!;
@@ -102,10 +136,10 @@ export function useHistory(filter?: AssetId) {
     const solMainnetItems: HistoryItem[] = solMainnetTxs.map(mapSolTx(solMainnet));
 
     // Pending first, then newest first.
-    return [...evmItems, ...btcItems, ...btcMainnetItems, ...solItems, ...solMainnetItems].sort(
+    return [...evmChainItems, ...evmItems, ...btcItems, ...btcMainnetItems, ...solItems, ...solMainnetItems].sort(
       (a, b) => (b.time ?? Infinity) - (a.time ?? Infinity),
     );
-  }, [walletId, btcAddress, solAddress, watchAddresses, filter]);
+  }, [walletId, evmAddress, btcAddress, solAddress, watchAddresses, filter]);
 
   const { data, loading, error, refresh } = useAsync(walletId && btcAddress && solAddress ? load : undefined);
   return { items: data, loading, error, refresh };

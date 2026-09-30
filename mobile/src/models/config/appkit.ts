@@ -17,9 +17,9 @@ export const appKit = createAppKit({
   adapters: [new EthersAdapter()],
   storage: appKitStorage,
   metadata: {
-    name: 'Dapp New',
+    name: 'Coinstep',
     description: 'React Native dApp: wallet, balance, transfers and contract calls',
-    url: typeof window !== 'undefined' ? window.location.origin : 'https://reown.com/appkit',
+    url: typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://reown.com/appkit',
     icons: ['https://avatars.githubusercontent.com/u/179229932'],
     redirect: { native: 'dappnew://' },
   },

@@ -8,6 +8,7 @@ import { useExternalSigner } from '../../controllers/useWallet';
 import { useHistory } from '../../controllers/useHistory';
 import { usePrices } from '../../controllers/usePrices';
 import { formatAssetAmount } from '../../models/assetAmounts';
+import type { MarketCoinId } from '../../models/services/marketApi';
 import { appKit } from '../../models/config/appkit';
 import { bitcoinTxUrl } from '../../models/config/bitcoin';
 import { getAsset } from '../../models/config/assets';
@@ -16,6 +17,7 @@ import { isValidSolanaAddress } from '../../models/services/solanaService';
 import { saveWatchAddress } from '../../models/services/walletStorage';
 import { shortAddress } from '../../models/format';
 import { HistoryList } from '../components/HistoryList';
+import { MiniPriceChart } from '../components/MiniPriceChart';
 import { Button, Card, Field, Muted, Screen, colors } from '../components/ui';
 import { ActionButton, CoinBadge } from '../components/wallet';
 
@@ -24,7 +26,7 @@ export default function CoinScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const asset = getAsset(id);
   const { byId, loading, refresh, watchAddresses, refreshWatchAddress } = useAssets();
-  const { getCoinPrice, getFiatValue, refresh: refreshPrices, loading: pricesLoading } = usePrices();
+  const { getFiatValue, refresh: refreshPrices, loading: pricesLoading } = usePrices();
   const history = useHistory(asset?.id);
   const utxos = useBitcoinUtxos(asset?.id === 'btc');
   const external = useExternalSigner();
@@ -42,7 +44,7 @@ export default function CoinScreen() {
 
   if (!asset) return <Screen><Muted>Unknown coin.</Muted></Screen>;
   const b = byId(asset.id);
-  const coinPrice = getCoinPrice(asset.id);
+  const marketCoin: MarketCoinId = asset.kind === 'bitcoin' ? 'btc' : asset.kind === 'solana' ? 'sol' : 'eth';
   const watchAddress = watchAddresses[asset.id];
   const needsWatchAddress = asset.readOnly && !watchAddress;
 
@@ -118,6 +120,11 @@ export default function CoinScreen() {
         </View>
       )}
 
+      <MiniPriceChart
+        coinId={marketCoin}
+        onPress={() => router.push({ pathname: '/coin-market/[id]', params: { id: asset.id } })}
+      />
+
       {!asset.readOnly ? (
         <View style={s.actions}>
           <ActionButton icon="arrow-up" label="Send" onPress={handleSend} />
@@ -130,31 +137,20 @@ export default function CoinScreen() {
         </View>
       ) : null}
 
+      {asset.kind !== 'solana' ? (
+        <Button
+          title={asset.mainnet ? `Buy ${asset.symbol}` : `Buy / Sell ${asset.name}`}
+          variant="secondary"
+          onPress={() => router.push({ pathname: '/buy-sell', params: { mode: 'buy' } })}
+        />
+      ) : null}
+
       {asset.faucetUrl ? (
         <Button
           title={`Get free ${asset.symbol} (faucet)`}
           variant="secondary"
           onPress={() => Linking.openURL(asset.faucetUrl!)}
         />
-      ) : null}
-
-      {coinPrice ? (
-        <Card title="Market Rate (Blockchain.com)">
-          <View style={s.marketRow}>
-            <Text style={s.marketLabel}>Current Price</Text>
-            <Text style={s.marketValue}>
-              ${coinPrice.price >= 1000
-                ? coinPrice.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                : coinPrice.price.toFixed(2)} USD
-            </Text>
-          </View>
-          <View style={s.marketRow}>
-            <Text style={s.marketLabel}>24h Change</Text>
-            <Text style={[s.marketValue, { color: coinPrice.change24h >= 0 ? '#34C759' : '#FF3B30' }]}>
-              {coinPrice.change24h >= 0 ? '+' : ''}{coinPrice.change24h.toFixed(2)}%
-            </Text>
-          </View>
-        </Card>
       ) : null}
 
       {asset.id === 'btc' ? (

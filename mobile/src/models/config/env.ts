@@ -19,3 +19,12 @@ export const SOLANA_DEVNET_RPC_URL =
 
 export const SOLANA_MAINNET_RPC_URL =
   process.env.EXPO_PUBLIC_SOLANA_MAINNET_RPC_URL || 'https://api.mainnet-beta.solana.com';
+
+// ---- optional app-store / legal / support links; the matching Settings rows are hidden when unset ----
+export const SUPPORT_EMAIL = process.env.EXPO_PUBLIC_SUPPORT_EMAIL ?? '';
+export const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL ?? '';
+export const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL ?? '';
+export const REVIEW_URL = process.env.EXPO_PUBLIC_REVIEW_URL ?? '';
+
+/** Optional MoonPay publishable key. With it, Buy / Sell opens with the wallet address prefilled. */
+export const MOONPAY_API_KEY = process.env.EXPO_PUBLIC_MOONPAY_API_KEY ?? '';

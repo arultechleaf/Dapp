@@ -9,9 +9,12 @@ import { shortAddress } from '../../models/format';
 import { colors } from './ui';
 import { MenuRow } from './wallet';
 
-/** Slide-in drawer from the left: History, Settings, Recover wallet, Lock (logout). */
+/** Contract Functions screen stays in the app; flip this to show its menu entry again. */
+const SHOW_CONTRACT_MENU = false;
+
+/** Slide-in drawer from the left: History, Settings, Recover wallet, Contract Functions. */
 export function SideMenu({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  const { active, lock } = useWalletStore();
+  const { active } = useWalletStore();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const panelWidth = Math.min(320, width * 0.82);
@@ -47,6 +50,7 @@ export function SideMenu({ visible, onClose }: { visible: boolean; onClose: () =
         </View>
 
         <MenuRow icon="time-outline" title="History" subtitle="Sent & received" onPress={() => go('/history')} />
+        <MenuRow icon="stats-chart-outline" title="Market" subtitle="Live BTC & ETH prices" onPress={() => go('/market')} />
         <MenuRow icon="settings-outline" title="Settings" subtitle="Wallets, PIN, security" onPress={() => go('/settings')} />
         <MenuRow
           icon="refresh-circle-outline"
@@ -54,19 +58,9 @@ export function SideMenu({ visible, onClose }: { visible: boolean; onClose: () =
           subtitle="Import with a recovery phrase"
           onPress={() => go('/onboarding/import')}
         />
-        <MenuRow icon="code-slash-outline" title="Contract Functions" subtitle="DappContract dApp" onPress={() => go('/contract')} />
-
-        <View style={{ flex: 1 }} />
-        <MenuRow
-          icon="log-out-outline"
-          title="Lock wallet"
-          subtitle="Log out — PIN needed to open"
-          danger
-          onPress={() => {
-            onClose();
-            lock();
-          }}
-        />
+        {SHOW_CONTRACT_MENU ? (
+          <MenuRow icon="code-slash-outline" title="Contract Functions" subtitle="DappContract dApp" onPress={() => go('/contract')} />
+        ) : null}
       </Animated.View>
     </Modal>
   );

@@ -4,22 +4,27 @@ import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { PrefsProvider } from '../controllers/PrefsStore';
 import { WalletStoreProvider, useWalletStore } from '../controllers/WalletStore';
 import { appKit } from '../models/config/appkit';
+import { AutoLock } from '../views/components/AutoLock';
 import { colors } from '../views/components/ui';
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AppKitProvider instance={appKit}>
-        <WalletStoreProvider>
-          <StatusBar style="light" />
-          <View style={s.outer}>
-            <View style={s.container}>
-              <RootNavigator />
+        <PrefsProvider>
+          <WalletStoreProvider>
+            <StatusBar style="light" />
+            <AutoLock />
+            <View style={s.outer}>
+              <View style={s.container}>
+                <RootNavigator />
+              </View>
             </View>
-          </View>
-        </WalletStoreProvider>
+          </WalletStoreProvider>
+        </PrefsProvider>
         {/* AppKit connect modal; absolutely positioned so it overlays the navigator on Android */}
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
           <AppKit />
@@ -63,6 +68,14 @@ function RootNavigator() {
         <Stack.Screen name="receive/[id]" options={{ title: 'Receive' }} />
         <Stack.Screen name="swap" options={{ title: 'Swap' }} />
         <Stack.Screen name="history" options={{ title: 'History' }} />
+        <Stack.Screen name="market" options={{ title: 'Market' }} />
+        <Stack.Screen name="coin-market/[id]" options={{ title: 'Market' }} />
+        <Stack.Screen name="security" options={{ title: 'Security' }} />
+        <Stack.Screen name="export-key" options={{ title: 'Export private key' }} />
+        <Stack.Screen name="preferences" options={{ title: 'Preferences' }} />
+        <Stack.Screen name="address-book" options={{ title: 'Address book' }} />
+        <Stack.Screen name="about" options={{ title: 'About & support' }} />
+        <Stack.Screen name="buy-sell" options={{ title: 'Buy / Sell' }} />
         <Stack.Screen name="settings" options={{ title: 'Settings' }} />
         <Stack.Screen name="phrase" options={{ title: 'Recovery phrase' }} />
         <Stack.Screen name="change-pin" options={{ title: 'Change PIN' }} />
@@ -73,6 +86,7 @@ function RootNavigator() {
       <Stack.Protected guard={status === 'empty'}>
         <Stack.Screen name="onboarding/welcome" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding/pin" options={{ title: '' }} />
+        <Stack.Screen name="onboarding/notifications" options={{ headerShown: false }} />
       </Stack.Protected>
 
       <Stack.Protected guard={status === 'empty' || status === 'unlocked'}>

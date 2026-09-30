@@ -13,6 +13,7 @@ import Svg, {
   Stop,
 } from 'react-native-svg';
 
+import { Logo } from './Logo';
 import { colors } from './ui';
 
 export function CoinstepHeroArtwork() {
@@ -103,31 +104,7 @@ export function CoinstepHeroArtwork() {
     <View style={styles.container}>
       {/* Brand Header: Logo + Coinstep Text */}
       <View style={styles.brandRow}>
-        <View style={styles.logoIconContainer}>
-          <Svg width={36} height={36} viewBox="0 0 44 44">
-            <Defs>
-              <LinearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <Stop offset="0%" stopColor="#00E5FF" />
-                <Stop offset="100%" stopColor="#0066FF" />
-              </LinearGradient>
-            </Defs>
-            {/* Outer circular badge */}
-            <Circle cx="22" cy="22" r="20" stroke="url(#logoGrad)" strokeWidth="3" fill="none" opacity="0.9" />
-            {/* Stylized S / lightning crypto insignia */}
-            <Path
-              d="M22 6 L26 14 L21 14 L25 22 L17 22 L22 14 L18 14 Z"
-              fill="url(#logoGrad)"
-              opacity="0.35"
-            />
-            <Path
-              d="M26 13 C23 10 17 11 16 15 C15 20 28 19 27 26 C26 31 19 32 15 29 M21 9 L21 33"
-              stroke="#00E5FF"
-              strokeWidth="3.2"
-              strokeLinecap="round"
-              fill="none"
-            />
-          </Svg>
-        </View>
+        <Logo size={44} />
         <Text style={styles.brandText}>Coinstep</Text>
       </View>
 

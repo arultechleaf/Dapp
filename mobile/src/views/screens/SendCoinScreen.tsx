@@ -4,6 +4,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Linking, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { usePrefs } from '../../controllers/PrefsStore';
 import { useAssets } from '../../controllers/useAssets';
 import { useSendAsset, type FeeSpeed } from '../../controllers/useSendAsset';
 import { useWalletStore } from '../../controllers/WalletStore';
@@ -27,6 +28,8 @@ export default function SendCoinScreen() {
   const { verifyPin } = useWalletStore();
   const { byId, refresh } = useAssets();
   const { validate, send, sending, status, txUrl } = useSendAsset(asset);
+  const { contacts } = usePrefs();
+  const saved = contacts.filter((c) => c.kind === asset?.kind);
 
   const [to, setTo] = useState('');
   const [amount, setAmount] = useState('');
@@ -75,6 +78,16 @@ export default function SendCoinScreen() {
         value={to}
         onChangeText={setTo}
       />
+      {saved.length > 0 ? (
+        <View style={s.chips}>
+          {saved.map((c) => (
+            <Pressable key={c.id} onPress={() => setTo(c.address)} style={s.chip}>
+              <Ionicons name="person-circle-outline" size={16} color={colors.primary} />
+              <Text style={s.chipText}>{c.name}</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
       <Button
         title="Paste address"
         variant="secondary"
@@ -178,6 +191,19 @@ export default function SendCoinScreen() {
 }
 
 const s = StyleSheet.create({
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  chipText: { color: colors.text, fontSize: 13, fontWeight: '600' },
   head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   headTitle: { color: colors.text, fontSize: 16, fontWeight: '600' },
   headSub: { color: colors.muted, fontSize: 13, marginTop: 2 },

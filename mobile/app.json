@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Dapp New",
+    "name": "Coinstep",
     "slug": "dapp-new",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,6 +16,12 @@
           "wc",
           "metamask",
           "trust",
+          "wc",
+          "metamask",
+          "trust",
+          "wc",
+          "metamask",
+          "trust",
           "wc"
         ],
         "NSAppTransportSecurity": {
@@ -26,7 +32,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -48,7 +54,8 @@
         "expo-build-properties",
         {
           "android": {
-            "usesCleartextTraffic": true
+            "usesCleartextTraffic": true,
+            "ndkVersion": "27.1.12297006"
           }
         }
       ],
@@ -64,6 +71,12 @@
       "eas": {
         "projectId": "a44a0567-5651-47dd-9cff-2e2215946512"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a44a0567-5651-47dd-9cff-2e2215946512"
     }
   }
 }

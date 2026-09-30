@@ -2,20 +2,24 @@ import { formatUnits } from 'ethers';
 import { useCallback } from 'react';
 
 import { getAsset, type AssetId } from '../models/config/assets';
+import { getDisplayCurrency } from '../models/format';
 import {
   fetchCryptoPrices,
   type MarketPrices,
 } from '../models/services/blockchainComApi';
 import type { AssetBalance } from './useAssets';
 import { useAsync } from './useAsync';
+import { usePrefs } from './PrefsStore';
 
+/** Formats a USD amount in the currency chosen in Preferences (name kept: inputs are always USD). */
 export function formatUsd(amount: number): string {
+  const { code, rate } = getDisplayCurrency();
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: code,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(amount * rate);
 }
 
 const decimalsFor = (kind: 'bitcoin' | 'evm' | 'solana') => (kind === 'bitcoin' ? 8 : kind === 'solana' ? 9 : 18);
@@ -27,6 +31,7 @@ const priceFor = (prices: MarketPrices, kind: 'bitcoin' | 'evm' | 'solana') =>
  * and computing USD valuations for wallet balances.
  */
 export function usePrices() {
+  usePrefs(); // re-render when the display currency changes
   const load = useCallback(() => fetchCryptoPrices(), []);
   const { data: prices, loading, error, refresh } = useAsync<MarketPrices>(load);
 

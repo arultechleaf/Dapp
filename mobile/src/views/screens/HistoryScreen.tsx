@@ -10,8 +10,8 @@ export default function HistoryScreen() {
       <StatusMessage status={error ? { kind: 'error', text: error } : undefined} />
       <HistoryList items={items} emptyText="No transactions yet. Pull down to refresh." />
       <Muted>
-        Bitcoin shows full on-chain history. Ethereum shows transactions sent from this app — incoming ETH appears in
-        your balance.
+        Shows sent and received transactions for Bitcoin, Ethereum (Sepolia and Mainnet) and Solana. Pull down to
+        refresh.
       </Muted>
     </Screen>
   );

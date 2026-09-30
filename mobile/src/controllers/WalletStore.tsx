@@ -49,6 +49,8 @@ type WalletStoreValue = {
 
   unlock: (pin: string) => Promise<boolean>;
   lock: () => void;
+  /** Unlocks after the OS has verified the user (biometrics). The PIN is not checked. */
+  unlockVerified: () => void;
   verifyPin: (pin: string) => Promise<boolean>;
   changePin: (oldPin: string, newPin: string) => Promise<boolean>;
   revealPhrase: (pin: string) => Promise<string | null>;
@@ -175,6 +177,8 @@ export function WalletStoreProvider({ children }: { children: ReactNode }) {
         setDerived(undefined);
         setStatus('locked');
       },
+
+      unlockVerified: () => setStatus('unlocked'),
 
       verifyPin: (pin) => storage.verifyPin(pin),
 

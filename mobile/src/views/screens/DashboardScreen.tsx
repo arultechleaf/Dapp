@@ -13,6 +13,7 @@ import { shortAddress } from '../../models/format';
 import { SideMenu } from '../components/SideMenu';
 import { colors } from '../components/ui';
 import { WalletSwitcher } from '../components/WalletSwitcher';
+import { Logo } from '../components/Logo';
 import { ActionButton, CoinBadge } from '../components/wallet';
 
 export default function DashboardScreen() {
@@ -46,7 +47,10 @@ export default function DashboardScreen() {
         <Pressable accessibilityLabel="Menu" onPress={() => setMenuOpen(true)} style={s.iconButton}>
           <Ionicons name="menu" size={26} color={colors.text} />
         </Pressable>
-        <Text style={s.brand}>Dapp New</Text>
+        <View style={s.brandRow}>
+          <Logo size={30} />
+          <Text style={s.brand}>Coinstep</Text>
+        </View>
         <Pressable onPress={() => setSwitcherOpen(true)} style={s.walletPill}>
           <Ionicons name="wallet" size={16} color={colors.primary} />
           <Text style={s.walletPillText} numberOfLines={1}>
@@ -153,6 +157,7 @@ export default function DashboardScreen() {
             onPress={() => router.push({ pathname: '/select-coin', params: { action: 'receive' } })}
           />
           <ActionButton icon="swap-horizontal" label="Swap" onPress={() => router.push('/swap')} />
+          <ActionButton icon="card" label="Buy/Sell" onPress={() => router.push('/buy-sell')} />
           <ActionButton icon="add" label="Add wallet" onPress={() => setSwitcherOpen(true)} />
         </View>
 
@@ -285,7 +290,8 @@ const s = StyleSheet.create({
     ...(Platform.OS === 'web' ? { maxWidth: 480, width: '100%', alignSelf: 'center' as const } : {}),
   },
   iconButton: { padding: 6 },
-  brand: { color: colors.text, fontSize: 18, fontWeight: '700', flex: 1 },
+  brandRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  brand: { color: colors.text, fontSize: 18, fontWeight: '700' },
   walletPill: {
     flexDirection: 'row',
     alignItems: 'center',

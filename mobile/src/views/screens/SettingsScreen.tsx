@@ -1,13 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useWalletStore } from '../../controllers/WalletStore';
+import { confirmAction } from '../components/confirm';
 import { Button, Field, Screen, colors } from '../components/ui';
 import { MenuRow } from '../components/wallet';
 
-/** Wallets, security (PIN, recovery phrase, lock), developer tools and reset. */
+/** Wallets, security, preferences, address book, connected apps, about, developer tools and reset. */
 export default function SettingsScreen() {
   const store = useWalletStore();
   const [editing, setEditing] = useState<string>();
@@ -52,13 +53,11 @@ export default function SettingsScreen() {
                     title="Remove wallet"
                     variant="danger"
                     onPress={() =>
-                      Alert.alert(
+                      confirmAction(
                         `Remove ${w.name}?`,
                         'It will be deleted from this phone. Make sure you have its recovery phrase to restore it later.',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          { text: 'Remove', style: 'destructive', onPress: () => store.removeWallet(w.id) },
-                        ],
+                        'Remove',
+                        () => store.removeWallet(w.id),
                       )
                     }
                   />
@@ -73,13 +72,46 @@ export default function SettingsScreen() {
       <Text style={s.section}>Security</Text>
       <View style={s.group}>
         <MenuRow
-          icon="key-outline"
-          title="Show recovery phrase"
-          subtitle="Requires your PIN"
-          onPress={() => router.push('/phrase')}
+          icon="shield-checkmark-outline"
+          title="Security"
+          subtitle="PIN, biometrics, auto-lock, backup phrase"
+          onPress={() => router.push('/security')}
         />
-        <MenuRow icon="keypad-outline" title="Change PIN" onPress={() => router.push('/change-pin')} />
-        <MenuRow icon="lock-closed-outline" title="Lock wallet (log out)" onPress={store.lock} />
+        <MenuRow
+          icon="key-outline"
+          title="Export private key"
+          subtitle="Requires your PIN"
+          onPress={() => router.push('/export-key')}
+        />
+        <MenuRow icon="lock-closed-outline" title="Lock wallet" onPress={store.lock} />
+      </View>
+
+      <Text style={s.section}>General</Text>
+      <View style={s.group}>
+        <MenuRow
+          icon="options-outline"
+          title="Preferences"
+          subtitle="Currency, notifications"
+          onPress={() => router.push('/preferences')}
+        />
+        <MenuRow
+          icon="book-outline"
+          title="Address book"
+          subtitle="Saved addresses"
+          onPress={() => router.push('/address-book')}
+        />
+        <MenuRow
+          icon="link-outline"
+          title="Connected apps"
+          subtitle="MetaMask / Trust Wallet via WalletConnect"
+          onPress={() => router.push('/connect')}
+        />
+        <MenuRow
+          icon="information-circle-outline"
+          title="About & support"
+          subtitle="Version, privacy, terms, support"
+          onPress={() => router.push('/about')}
+        />
       </View>
 
       <Text style={s.section}>Developer</Text>
@@ -90,12 +122,6 @@ export default function SettingsScreen() {
           subtitle="DappContract on Sepolia / Hardhat"
           onPress={() => router.push('/contract')}
         />
-        <MenuRow
-          icon="link-outline"
-          title="Connect external wallet"
-          subtitle="MetaMask / Trust Wallet via WalletConnect"
-          onPress={() => router.push('/connect')}
-        />
       </View>
 
       <View style={s.group}>
@@ -105,10 +131,9 @@ export default function SettingsScreen() {
           subtitle="Remove all wallets and the PIN"
           danger
           onPress={() =>
-            Alert.alert('Reset app?', 'All wallets and your PIN will be removed from this phone.', [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Reset', style: 'destructive', onPress: () => store.resetAll() },
-            ])
+            confirmAction('Reset app?', 'All wallets and your PIN will be removed from this phone.', 'Reset', () =>
+              store.resetAll(),
+            )
           }
         />
       </View>

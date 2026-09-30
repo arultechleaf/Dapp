@@ -1,5 +1,14 @@
 import { formatEther } from 'ethers';
 
+/** Fiat display currency. Amounts everywhere are USD; they are converted with this rate when shown. */
+let displayCurrency = { code: 'USD', rate: 1 };
+export function setDisplayCurrency(code: string, rate: number) {
+  displayCurrency = { code, rate };
+}
+export function getDisplayCurrency() {
+  return displayCurrency;
+}
+
 export function shortAddress(address?: string, chars = 4) {
   if (!address) return '';
   return `${address.slice(0, chars + 2)}…${address.slice(-chars)}`;

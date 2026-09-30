@@ -8,7 +8,7 @@ import { PinPad } from '../../components/PinPad';
 /** Step 1 of onboarding: choose a 6-digit PIN, then enter it again to confirm. */
 export default function PinSetupScreen() {
   const { next } = useLocalSearchParams<{ next?: 'create' | 'import' }>();
-  const { setupPin, beginCreate } = useWalletStore();
+  const { setupPin } = useWalletStore();
   const [first, setFirst] = useState<string>();
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -30,12 +30,7 @@ export default function PinSetupScreen() {
     setBusy(true);
     try {
       await setupPin(pin);
-      if (next === 'import') {
-        router.replace('/onboarding/import');
-      } else {
-        beginCreate();
-        router.replace('/onboarding/backup');
-      }
+      router.replace({ pathname: '/onboarding/notifications', params: { next: next ?? 'create' } });
     } catch (e) {
       setError(errorMessage(e));
       setFirst(undefined);
