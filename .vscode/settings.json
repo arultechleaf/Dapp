@@ -1,0 +1,19 @@
+{
+  // Hide generated / tool folders so the tree shows only source.
+  // They still exist on disk; set any entry to false to show it again.
+  "files.exclude": {
+    "contracts/artifacts": true,
+    "contracts/cache": true,
+    "contracts/types": true,
+    "contracts/.deps": true,
+    "contracts/.states": true,
+    "contracts/.gitignore": true,
+    "contracts/package-lock.json": true,
+
+    "mobile/.expo": true,
+    "mobile/android": true,
+    "mobile/expo-env.d.ts": true,
+    "mobile/.gitignore": true,
+    "mobile/package-lock.json": true
+  }
+}
